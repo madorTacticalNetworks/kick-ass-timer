@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kick Ass Timer</title>
-  <meta name="description" content="Log start/stop event times per scenario against a synced clock, edit them, and export to CSV.">
+  <meta name="description" content="Log start/stop times per sortie against a synced clock, edit them, and export to CSV.">
   <meta name="theme-color" content="#111114">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/favicon-32.png">
@@ -34,20 +34,20 @@
     <!-- HOME -->
     <section id="home" class="view">
       <div id="scenarioForm" class="card">
-        <label for="scenarioInput" class="label">Scenario number</label>
+        <label for="scenarioInput" class="label">Sortie number</label>
         <div class="row">
           <input id="scenarioInput" class="big-input" inputmode="numeric" enterkeyhint="go" placeholder="e.g. 7" autocomplete="off">
           <button id="openBtn" class="btn primary" type="button">Open ⏎</button>
         </div>
-        <p class="hint"><span class="pc-only">Type a number and press Enter.</span><span class="phone-only">Type a number and tap Open.</span> An existing number reopens that scenario.</p>
+        <p class="hint"><span class="pc-only">Type a number and press Enter.</span><span class="phone-only">Type a number and tap Open.</span> An existing number reopens that sortie.</p>
       </div>
 
       <div class="list-head">
-        <h2>Scenarios</h2>
+        <h2>Sorties</h2>
         <button id="exportAllBtn" class="btn small ghost" type="button">Export all CSV</button>
       </div>
       <ul id="scenarioList" class="scenario-list"></ul>
-      <p id="emptyList" class="muted center">No scenarios yet.</p>
+      <p id="emptyList" class="muted center">No sorties yet.</p>
 
       <div id="installCard" class="card install" hidden>
         <strong>Install on your phone</strong>
@@ -60,8 +60,8 @@
     <!-- SCENARIO -->
     <section id="scenario" class="view" hidden>
       <div class="scn-head">
-        <button id="backBtn" class="btn ghost small" type="button">← Scenarios</button>
-        <h1 id="scnTitle">Scenario</h1>
+        <button id="backBtn" class="btn ghost small" type="button">← Sorties</button>
+        <h1 id="scnTitle">Sortie</h1>
       </div>
 
       <button id="markBtn" class="mark start" type="button">
@@ -81,7 +81,7 @@
       </div>
 
       <div class="list-head">
-        <h2>Sorties <span id="evCount" class="muted"></span></h2>
+        <h2>Events <span id="evCount" class="muted"></span></h2>
         <div class="row gap">
           <button id="addEventBtn" class="btn small ghost" type="button">+ Add</button>
           <button id="exportBtn" class="btn small primary" type="button">Export CSV</button>
@@ -89,20 +89,20 @@
       </div>
       <div class="table-wrap">
         <table class="events">
-          <thead><tr><th>Sortie</th><th>Start</th><th>End</th><th>Dur.</th><th></th></tr></thead>
+          <thead><tr><th>Event ID</th><th>Start</th><th>End</th><th>Dur.</th><th></th></tr></thead>
           <tbody id="eventRows"></tbody>
         </table>
       </div>
-      <p id="emptyEvents" class="muted center">No sorties yet. Press START.</p>
+      <p id="emptyEvents" class="muted center">No events yet. Press START.</p>
 
-      <button id="deleteScnBtn" class="btn danger-ghost small del-scn" type="button">Delete scenario</button>
+      <button id="deleteScnBtn" class="btn danger-ghost small del-scn" type="button">Delete sortie</button>
     </section>
   </main>
 
   <!-- EDIT DIALOG -->
   <dialog id="editDlg">
     <div id="editForm">
-      <h3 id="editTitle">Edit sortie</h3>
+      <h3 id="editTitle">Edit event</h3>
       <label class="label" for="editDate">Date</label>
       <input id="editDate" type="date">
       <div class="row gap">

@@ -1,5 +1,5 @@
 // Kick Ass Timer service worker: works offline, refreshes files in the background.
-const CACHE = 'kat-v8';
+const CACHE = 'kat-v9';
 const ASSETS = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 

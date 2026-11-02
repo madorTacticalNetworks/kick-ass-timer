@@ -227,7 +227,7 @@ function openScenario(id, push = true) {
   current = id;
   $('#home').hidden = true; $('#scenario').hidden = false;
   if (push) safeHistory('pushState', '#s=' + encodeURIComponent(s.id));
-  $('#scnTitle').textContent = 'Scenario ' + s.number;
+  $('#scnTitle').textContent = 'Sortie ' + s.number;
   $('#remarks').value = s.remarks || '';
   renderScenario();
   document.activeElement && document.activeElement.blur && document.activeElement.blur();
@@ -242,7 +242,7 @@ function renderHome() {
   list.innerHTML = items.map((s) => {
     const n = s.sorties.length;
     return `<li data-id="${esc(s.id)}"><span><span class="num">#${esc(s.number)}</span>${runningSortie(s) ? '<span class="badge">RUNNING</span>' : ''}</span>
-      <span class="meta">${n} sortie${n === 1 ? '' : 's'}<br>${s.updated ? new Date(s.updated).toLocaleString() : ''}</span></li>`;
+      <span class="meta">${n} event${n === 1 ? '' : 's'}<br>${s.updated ? new Date(s.updated).toLocaleString() : ''}</span></li>`;
   }).join('');
 }
 
@@ -271,10 +271,10 @@ function tickRun() {
   const el = $('#runInfo');
   if (r) {
     el.classList.add('running');
-    el.textContent = `Sortie ${s.sorties.indexOf(r) + 1} running ${fmtDur(now() - r.start)}`;
+    el.textContent = `Event ${s.sorties.indexOf(r) + 1} running ${fmtDur(now() - r.start)}`;
   } else {
     el.classList.remove('running');
-    el.textContent = `Next: start sortie ${s.sorties.length + 1}`;
+    el.textContent = `Next: start event ${s.sorties.length + 1}`;
   }
 }
 
@@ -313,15 +313,15 @@ function deleteSortie(id) {
   const s = findScn(current); if (!s) return;
   const idx = s.sorties.findIndex((x) => x.id === id); if (idx < 0) return;
   const [x] = s.sorties.splice(idx, 1); s.updated = Date.now(); save(); renderScenario();
-  toast(`Deleted sortie ${idx + 1}`, () => { s.sorties.push(x); save(); renderScenario(); });
+  toast(`Deleted event ${idx + 1}`, () => { s.sorties.push(x); save(); renderScenario(); });
 }
 
 let editing = null; // sortie id, or 'new'
 function openEdit(id) {
   const s = findScn(current); if (!s) return;
   let x;
-  if (id === 'new') { x = { start: now(), end: null }; $('#editTitle').textContent = 'Add sortie'; }
-  else { x = s.sorties.find((y) => y.id === id); if (!x) return; $('#editTitle').textContent = `Edit sortie ${s.sorties.indexOf(x) + 1}`; }
+  if (id === 'new') { x = { start: now(), end: null }; $('#editTitle').textContent = 'Add event'; }
+  else { x = s.sorties.find((y) => y.id === id); if (!x) return; $('#editTitle').textContent = `Edit event ${s.sorties.indexOf(x) + 1}`; }
   editing = id;
   $('#editDate').value = fmtDate(x.start != null ? x.start : x.end);
   $('#editStart').value = fmtSec(x.start);
@@ -372,7 +372,7 @@ function deleteScenario() {
   const b = $('#deleteScnBtn');
   if (delArmed !== s.id) {
     delArmed = s.id; b.classList.add('armed');
-    b.textContent = `Tap again to delete scenario ${s.number} (${s.sorties.length} sorties)`;
+    b.textContent = `Tap again to delete sortie ${s.number} (${s.sorties.length} events)`;
     setTimeout(disarmDelete, 4000);
     return;
   }
@@ -380,7 +380,7 @@ function deleteScenario() {
   db.scenarios = db.scenarios.filter((x) => x.id !== s.id); save();
   goHome();
 }
-function disarmDelete() { delArmed = null; const b = $('#deleteScnBtn'); b.classList.remove('armed'); b.textContent = 'Delete scenario'; }
+function disarmDelete() { delArmed = null; const b = $('#deleteScnBtn'); b.classList.remove('armed'); b.textContent = 'Delete sortie'; }
 
 // ---------------------------------------------------------------- CSV
 function csvCell(v) {
@@ -390,7 +390,7 @@ function csvCell(v) {
 }
 const csvRow = (a) => a.map(csvCell).join(',');
 // One row per sortie. The three sortie/hit columns are left empty to fill in later.
-const CSV_HEAD = ['Scenario', 'Sortie', 'Start time', 'End time', 'Sortie start time', 'Hit time', 'Sortie end time', 'Remarks'];
+const CSV_HEAD = ['Sortie', 'Event ID', 'Start time', 'End time', 'Sortie start time', 'Hit time', 'Sortie end time', 'Remarks'];
 
 function scenarioRows(s) {
   sortSorties(s);
@@ -425,7 +425,7 @@ async function deliver(name, text) {
 const stamp = () => { const d = new Date(now()); return fmtDate(d) + '_' + pad(d.getHours()) + pad(d.getMinutes()); };
 function exportScenario() {
   const s = findScn(current); if (!s) return;
-  deliver(`scenario_${String(s.number).replace(/[^\w-]+/g, '_')}_${stamp()}.csv`, buildCsv([s]));
+  deliver(`sortie_${String(s.number).replace(/[^\w-]+/g, '_')}_${stamp()}.csv`, buildCsv([s]));
 }
 function exportAll() {
   if (!db.scenarios.length) return toast('Nothing to export yet.');
