@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kick Ass Timer</title>
+  <meta name="description" content="Log start/stop event times per scenario against a synced clock, edit them, and export to CSV.">
+  <meta name="theme-color" content="#111114">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KA Timer">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Phones/tablets: buttons only. PCs: Enter + Backspace shortcuts too.
+    if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)) ||
+        (window.matchMedia && matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches)) document.documentElement.classList.add('phone');
+  </script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">KICK ASS TIMER</div>
+    <button id="clockBtn" class="clock" title="Tap to re-sync">
+      <span id="clock" class="clock-time">--:--:--.-</span>
+      <span id="syncStatus" class="sync"><i class="dot"></i><span>Syncing…</span></span>
+    </button>
+  </header>
+
+  <div id="storageWarn" class="warn" hidden>⚠️ This viewer blocks saving. Data will be lost when you close it. Open the file in Chrome/Safari instead.</div>
+  <main>
+    <!-- HOME -->
+    <section id="home" class="view">
+      <div id="scenarioForm" class="card">
+        <label for="scenarioInput" class="label">Scenario number</label>
+        <div class="row">
+          <input id="scenarioInput" class="big-input" inputmode="numeric" enterkeyhint="go" placeholder="e.g. 7" autocomplete="off">
+          <button id="openBtn" class="btn primary" type="button">Open ⏎</button>
+        </div>
+        <p class="hint"><span class="pc-only">Type a number and press Enter.</span><span class="phone-only">Type a number and tap Open.</span> An existing number reopens that scenario.</p>
+      </div>
+
+      <div class="list-head">
+        <h2>Scenarios</h2>
+        <button id="exportAllBtn" class="btn small ghost" type="button">Export all CSV</button>
+      </div>
+      <ul id="scenarioList" class="scenario-list"></ul>
+      <p id="emptyList" class="muted center">No scenarios yet.</p>
+
+      <div id="installCard" class="card install" hidden>
+        <strong>Install on your phone</strong>
+        <button id="installBtn" class="btn small primary" type="button" hidden>Install app</button>
+        <p class="hint"><b>iPhone (Safari):</b> Share ⬆️ → <i>Add to Home Screen</i>.<br>
+        <b>Android (Chrome):</b> menu ⋮ → <i>Install app</i> / <i>Add to Home screen</i>.</p>
+      </div>
+    </section>
+
+    <!-- SCENARIO -->
+    <section id="scenario" class="view" hidden>
+      <div class="scn-head">
+        <button id="backBtn" class="btn ghost small" type="button">← Scenarios</button>
+        <h1 id="scnTitle">Scenario</h1>
+      </div>
+
+      <button id="markBtn" class="mark start" type="button">
+        <span id="markLabel" class="mark-label">START</span>
+        <span class="mark-sub"><span class="phone-only">tap to log</span><span class="pc-only">click, or press Backspace</span></span>
+      </button>
+      <div id="runInfo" class="run-info muted">Next event: start</div>
+      <label class="kbd-capture" id="kbdWrap">
+        <input id="kbdCapture" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-label="Keyboard capture: press Backspace here to log an event">
+        <span class="kbd-label" id="kbdLabel">⌨️ Click here, then press Backspace to log</span>
+      </label>
+
+      <div class="card">
+        <label for="remarks" class="label">General remarks</label>
+        <textarea id="remarks" rows="3" placeholder="Device name, conditions, mistakes that were fixed…"></textarea>
+        <div id="remarksSaved" class="hint">Saved automatically</div>
+      </div>
+
+      <div class="list-head">
+        <h2>Sorties <span id="evCount" class="muted"></span></h2>
+        <div class="row gap">
+          <button id="addEventBtn" class="btn small ghost" type="button">+ Add</button>
+          <button id="exportBtn" class="btn small primary" type="button">Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="events">
+          <thead><tr><th>Sortie</th><th>Start</th><th>End</th><th>Dur.</th><th></th></tr></thead>
+          <tbody id="eventRows"></tbody>
+        </table>
+      </div>
+      <p id="emptyEvents" class="muted center">No sorties yet. Press START.</p>
+
+      <button id="deleteScnBtn" class="btn danger-ghost small del-scn" type="button">Delete scenario</button>
+    </section>
+  </main>
+
+  <!-- EDIT DIALOG -->
+  <dialog id="editDlg">
+    <div id="editForm">
+      <h3 id="editTitle">Edit sortie</h3>
+      <label class="label" for="editDate">Date</label>
+      <input id="editDate" type="date">
+      <div class="row gap">
+        <div style="flex:1"><label class="label" for="editStart">Start (HH:MM:SS)</label><input id="editStart" type="text" placeholder="14:03:27" autocomplete="off"></div>
+        <div style="flex:1"><label class="label" for="editEnd">End (empty = running)</label><input id="editEnd" type="text" placeholder="14:05:10" autocomplete="off"></div>
+      </div>
+      <p id="editErr" class="err" hidden></p>
+      <div class="row gap end">
+        <button class="btn ghost" value="cancel" type="button" id="editCancel">Cancel</button>
+        <button id="editSave" class="btn primary" type="button">Save</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" hidden><span id="toastMsg"></span><button id="toastBtn" class="btn small ghost" type="button" hidden>Undo</button></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
